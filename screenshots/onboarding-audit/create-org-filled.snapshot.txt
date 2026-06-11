@@ -1,0 +1,8 @@
+- heading "Sign in to Flack" [level=1, ref=e1]
+- button "Sign in" [ref=e2]
+- button "Magic link" [ref=e3]
+- button "Create" [ref=e4]
+- textbox "you@company.com" [required, ref=e5]: founder@example.com
+- textbox "Create password" [required, ref=e6]: •••••••••••
+- textbox "Organization name" [required, ref=e7]: Acme Research
+- button "Create workspace" [ref=e8]

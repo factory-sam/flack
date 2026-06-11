@@ -1,0 +1,7 @@
+- heading "Join an organization" [level=1, ref=e1]
+- button "Sign in" [ref=e2]
+- button "Magic link" [ref=e3]
+- button "Accept" [ref=e4]
+- textbox "you@company.com" [required, ref=e5]
+- textbox "Create password" [required, ref=e6]
+- button "Accept invite" [disabled, ref=e7]

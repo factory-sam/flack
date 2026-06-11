@@ -1,0 +1,7 @@
+- heading "Join an organization" [level=1, ref=e1]
+- button "Sign in" [ref=e2]
+- button "Magic link" [ref=e3]
+- button "Create account" [ref=e4]
+- textbox "WORK EMAIL" [required, ref=e6]
+- textbox "CREATE PASSWORD" [required, ref=e7]
+- button "Create account and join" [disabled, ref=e5]

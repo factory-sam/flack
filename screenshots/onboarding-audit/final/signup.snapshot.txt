@@ -1,0 +1,7 @@
+- heading "Set up a workspace" [level=1, ref=e2]
+- textbox "ORGANIZATION NAME" [required, ref=e4]
+- textbox "ADMIN EMAIL" [required, ref=e5]
+- textbox "PASSWORD" [required, ref=e6]
+- button "Create organization" [disabled, ref=e3]
+- link "SIGN IN" [ref=e7]
+- heading "A clean starting point" [level=2, ref=e1]

@@ -1,0 +1,7 @@
+- heading "Sign in to Flack" [level=1, ref=e1]
+- button "Sign in" [ref=e2]
+- button "Magic link" [ref=e3]
+- textbox "WORK EMAIL" [required, ref=e5]
+- textbox "PASSWORD" [required, ref=e6]
+- button "Continue" [disabled, ref=e4]
+- link "CREATE ONE" [ref=e7]
