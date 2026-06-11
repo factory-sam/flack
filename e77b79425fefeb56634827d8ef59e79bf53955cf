@@ -1,0 +1,74 @@
+src/app/not-found.tsx
+  87f5862b3e90d01d 1-30
+src/types/database.ts
+  87f5862b3e90d01d 1-123
+src/app/(auth)/signup/page.tsx
+  87f5862b3e90d01d 1-18
+src/lib/supabase/client.ts
+  87f5862b3e90d01d 1-23
+components.json
+  s_87f5862b3e90d0::t_9ef7dacb9c30b8 1-21
+src/lib/supabase/server.ts
+  87f5862b3e90d01d 1-29
+.impeccable.md
+  87f5862b3e90d01d 1-17
+screenshots/onboarding-audit/critique.md
+  87f5862b3e90d01d 1-134
+src/lib/supabase/env.ts
+  87f5862b3e90d01d 1-10
+src/app/globals.css
+  87f5862b3e90d01d 1-89
+src/app/(auth)/login/page.tsx
+  87f5862b3e90d01d 1-23
+supabase/seed.sql
+  87f5862b3e90d01d 1
+src/lib/utils.ts
+  s_87f5862b3e90d0::t_64250295004e6c 1-20
+src/features/auth/login-form.tsx
+  87f5862b3e90d01d 1-157
+src/lib/supabase/middleware.ts
+  87f5862b3e90d01d 1-30
+src/features/auth/signup-form.tsx
+  87f5862b3e90d01d 1-114
+src/features/chat/chat-workspace.tsx
+  87f5862b3e90d01d 1-642
+supabase/migrations/002_multi_tenant_organizations.sql
+  87f5862b3e90d01d 1-283
+src/components/ui/button.tsx
+  87f5862b3e90d01d 10
+  s_87f5862b3e90d0::t_0238996474c129 1-9,11-44
+screenshots/critique.md
+  87f5862b3e90d01d 2,19-22,34-36,38-40,44-46,48,50,52,54,56,58,60-62,64,66,68,70,72,74,76,78-80,82-87,90-93,95-97,99,101,103-105,110-112,118
+src/components/ui/input.tsx
+  s_87f5862b3e90d0::t_2956daf3c8503b 1-54
+.env.example
+  87f5862b3e90d01d 1-3
+src/types/chat.ts
+  87f5862b3e90d01d 1-64
+src/app/(auth)/invite/[token]/page.tsx
+  87f5862b3e90d01d 1-19
+src/app/auth/callback/route.ts
+  87f5862b3e90d01d 1-18
+.github/copilot-instructions.md
+  87f5862b3e90d01d 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.2",
+  "base_commit_sha": "e77b79425fefeb56634827d8ef59e79bf53955cf",
+  "prompts": {
+    "87f5862b3e90d01d": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "97a1dfde-8140-4555-a795-d728705aa230",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Sam Fitzgerald",
+      "messages": [],
+      "total_additions": 2170,
+      "total_deletions": 77,
+      "accepted_lines": 1900,
+      "overriden_lines": 46
+    }
+  }
+}
