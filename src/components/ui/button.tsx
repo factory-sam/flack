@@ -7,8 +7,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "border border-[color-mix(in_oklch,var(--accent)_45%,var(--line))] bg-[color-mix(in_oklch,var(--accent)_28%,var(--surface-2))] text-[var(--text)] shadow-sm shadow-black/20 hover:border-[var(--accent)] hover:bg-[color-mix(in_oklch,var(--accent)_36%,var(--surface-2))]",
-        ghost: "border border-[var(--line)] bg-transparent text-[var(--muted)] hover:border-[var(--line-strong)] hover:bg-[var(--panel-2)] hover:text-[var(--text)]",
+        primary:
+          "border border-[color-mix(in_oklch,var(--accent)_45%,var(--line))] bg-[color-mix(in_oklch,var(--accent)_28%,var(--surface-2))] text-[var(--text)] shadow-sm shadow-black/20 hover:border-[var(--accent)] hover:bg-[color-mix(in_oklch,var(--accent)_36%,var(--surface-2))]",
+        ghost:
+          "border border-[var(--line)] bg-transparent text-[var(--muted)] hover:border-[var(--line-strong)] hover:bg-[var(--panel-2)] hover:text-[var(--text)]",
         danger: "bg-[var(--danger)] text-white shadow-sm shadow-black/20 hover:brightness-110"
       },
       size: {
@@ -33,12 +35,7 @@ export function Button({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
 
-  return (
-    <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
 export { buttonVariants };

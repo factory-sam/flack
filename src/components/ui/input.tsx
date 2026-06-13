@@ -33,22 +33,20 @@ const textareaVariants = cva(
   }
 );
 
-export function Input({ className, density, ...props }: React.InputHTMLAttributes<HTMLInputElement> & VariantProps<typeof inputVariants>) {
-  return (
-    <input
-      {...props}
-      className={cn(inputVariants({ density, className }))}
-    />
-  );
+export function Input({
+  className,
+  density,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & VariantProps<typeof inputVariants>) {
+  return <input {...props} className={cn(inputVariants({ density, className }))} />;
 }
 
-export function Textarea({ className, density, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & VariantProps<typeof textareaVariants>) {
-  return (
-    <textarea
-      {...props}
-      className={cn(textareaVariants({ density, className }))}
-    />
-  );
+export function Textarea({
+  className,
+  density,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & VariantProps<typeof textareaVariants>) {
+  return <textarea {...props} className={cn(textareaVariants({ density, className }))} />;
 }
 
 export { inputVariants, textareaVariants };
