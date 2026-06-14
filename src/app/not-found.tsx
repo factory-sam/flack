@@ -12,14 +12,24 @@ export default function NotFound() {
 
       <section className="flex items-center px-6">
         <div className="w-full max-w-xl">
-          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--faint)]">404 · route not found</p>
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--faint)]">
+            404 · route not found
+          </p>
           <h1 className="text-2xl font-medium tracking-tight">This route is not available.</h1>
-          <p className="mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">The page may have moved, or your session may not have access to it.</p>
+          <p className="mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">
+            The page may have moved, or your session may not have access to it.
+          </p>
           <div className="mt-6 flex gap-2">
-            <Link href="/" className="inline-flex h-9 items-center rounded-[5px] border border-[color-mix(in_oklch,var(--accent)_45%,var(--line))] bg-[color-mix(in_oklch,var(--accent)_28%,var(--surface-2))] px-3 text-sm font-medium text-[var(--text)] hover:border-[var(--accent)] hover:bg-[color-mix(in_oklch,var(--accent)_36%,var(--surface-2))]">
+            <Link
+              href="/"
+              className="inline-flex h-9 items-center rounded-[5px] border border-[color-mix(in_oklch,var(--accent)_45%,var(--line))] bg-[color-mix(in_oklch,var(--accent)_28%,var(--surface-2))] px-3 text-sm font-medium text-[var(--text)] hover:border-[var(--accent)] hover:bg-[color-mix(in_oklch,var(--accent)_36%,var(--surface-2))]"
+            >
               Return to workspace
             </Link>
-            <Link href="/login" className="inline-flex h-9 items-center rounded-[5px] border border-[var(--line)] px-3 text-sm font-medium text-[var(--muted)] hover:border-[var(--line-strong)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]">
+            <Link
+              href="/login"
+              className="inline-flex h-9 items-center rounded-[5px] border border-[var(--line)] px-3 text-sm font-medium text-[var(--muted)] hover:border-[var(--line-strong)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+            >
               Sign in
             </Link>
           </div>

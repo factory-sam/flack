@@ -11,7 +11,12 @@ export function formatTime(value: string) {
 
 export function initials(name: string | null | undefined) {
   const parts = (name ?? "?").trim().split(/\s+/).filter(Boolean);
-  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "?";
+  return (
+    parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "?"
+  );
 }
 
 export function channelLabel(name: string | null, type: string) {

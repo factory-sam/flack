@@ -1,0 +1,43 @@
+# Code ownership for the Flack codebase.
+# Each line maps a path pattern to one or more owners who are
+# automatically requested for review on matching pull requests.
+# Syntax: https://docs.github.com/articles/about-code-owners
+# Later matching rules take precedence over earlier ones.
+
+# Default owner for everything not matched below.
+*                               @factory-sam
+
+# Application code (Next.js App Router + React UI).
+/src/                           @factory-sam
+/src/app/                       @factory-sam
+/src/components/                @factory-sam
+/src/features/                  @factory-sam
+
+# Auth, session, and Supabase access layer (security-sensitive).
+/src/proxy.ts                   @factory-sam
+/src/app/auth/                  @factory-sam
+/src/features/auth/             @factory-sam
+/src/lib/supabase/              @factory-sam
+
+# Observability surface (logger, health checks).
+/src/lib/logger.ts              @factory-sam
+/src/lib/health.ts              @factory-sam
+/src/app/health/                @factory-sam
+
+# Database schema, RLS policies, and migrations (high blast radius).
+/supabase/                      @factory-sam
+
+# CI/CD, repo automation, and tooling configuration.
+/.github/                       @factory-sam
+/scripts/                       @factory-sam
+/eslint.config.mjs              @factory-sam
+/vitest.config.ts               @factory-sam
+/playwright.config.ts           @factory-sam
+/next.config.ts                 @factory-sam
+/knip.json                      @factory-sam
+/.jscpd.json                    @factory-sam
+
+# Project documentation and agent guidance.
+/README.md                      @factory-sam
+/AGENTS.md                      @factory-sam
+/.factory/                      @factory-sam

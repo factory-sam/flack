@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup and contribution questions
+    url: https://github.com/factory-sam/flack/blob/main/AGENTS.md
+    about: Read AGENTS.md for commands, conventions, architecture, and the local Supabase workflow before opening an issue.
+  - name: Security report
+    url: https://github.com/factory-sam/flack/security/advisories/new
+    about: Please report suspected security vulnerabilities privately rather than via a public issue.

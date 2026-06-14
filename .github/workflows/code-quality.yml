@@ -1,0 +1,61 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (includes complexity, max-lines, naming)
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Unit tests (coverage thresholds + JUnit timing report)
+        run: pnpm test:ci
+
+      - name: Upload test report (timing + flaky detection)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: reports/junit.xml
+          if-no-files-found: warn
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: warn
+
+      - name: Dead code and unused dependencies (knip)
+        run: pnpm knip
+
+      - name: Duplicate code (jscpd)
+        run: pnpm duplication
+
+      - name: Technical debt markers
+        run: pnpm tech-debt
+
+      - name: Validate docs (AGENTS.md/README commands + links)
+        run: pnpm validate-docs

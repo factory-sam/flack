@@ -48,9 +48,7 @@ export function LoginForm() {
           password,
           options: {
             emailRedirectTo: redirectTo,
-            data: inviteToken
-              ? { onboarding_kind: "invite", invite_token: inviteToken }
-              : { onboarding_kind: "invite" }
+            data: inviteToken ? { onboarding_kind: "invite", invite_token: inviteToken } : { onboarding_kind: "invite" }
           }
         });
 
@@ -83,6 +81,17 @@ export function LoginForm() {
     }
   }
 
+  function submitLabel() {
+    if (loading) return "Working";
+    if (mode === "magic") return "Send magic link";
+    if (mode === "accept") return "Create account and join";
+    return "Continue";
+  }
+
+  function submitDisabled() {
+    return loading || !email || (mode !== "magic" && password.length < 6);
+  }
+
   return (
     <main className="grid min-h-screen bg-[var(--bg)] text-[var(--text)] md:grid-cols-[minmax(280px,420px)_1fr]">
       <section className="flex min-h-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
@@ -93,22 +102,42 @@ export function LoginForm() {
 
         <form onSubmit={submit} className="flex flex-1 flex-col justify-center px-6 py-8">
           <div className="mb-7">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--faint)]">{isInvite ? "Invitation" : "Workspace access"}</p>
-            <h1 className="text-xl font-medium tracking-tight">{isInvite ? "Join an organization" : "Sign in to Flack"}</h1>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--faint)]">
+              {isInvite ? "Invitation" : "Workspace access"}
+            </p>
+            <h1 className="text-xl font-medium tracking-tight">
+              {isInvite ? "Join an organization" : "Sign in to Flack"}
+            </h1>
             <p className="mt-2 max-w-sm text-xs leading-5 text-[var(--muted)]">
-              {isInvite ? "Use the exact email address that received this invite." : "Access an existing organization. Creating a new organization has its own setup path."}
+              {isInvite
+                ? "Use the exact email address that received this invite."
+                : "Access an existing organization. Creating a new organization has its own setup path."}
             </p>
           </div>
 
-          <div className={`mb-4 grid ${isInvite ? "grid-cols-3" : "grid-cols-2"} rounded-[6px] border border-[var(--line)] bg-[var(--surface-0)] p-0.5 text-xs`}>
-            <button type="button" onClick={() => setMode("password")} className={`h-8 rounded-[4px] transition-colors ${mode === "password" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}>
+          <div
+            className={`mb-4 grid ${isInvite ? "grid-cols-3" : "grid-cols-2"} rounded-[6px] border border-[var(--line)] bg-[var(--surface-0)] p-0.5 text-xs`}
+          >
+            <button
+              type="button"
+              onClick={() => setMode("password")}
+              className={`h-8 rounded-[4px] transition-colors ${mode === "password" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
+            >
               Sign in
             </button>
-            <button type="button" onClick={() => setMode("magic")} className={`h-8 rounded-[4px] transition-colors ${mode === "magic" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}>
+            <button
+              type="button"
+              onClick={() => setMode("magic")}
+              className={`h-8 rounded-[4px] transition-colors ${mode === "magic" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
+            >
               Magic link
             </button>
             {isInvite ? (
-              <button type="button" onClick={() => setMode("accept")} className={`h-8 rounded-[4px] transition-colors ${mode === "accept" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}>
+              <button
+                type="button"
+                onClick={() => setMode("accept")}
+                className={`h-8 rounded-[4px] transition-colors ${mode === "accept" ? "bg-[var(--surface-2)] text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]"}`}
+              >
                 Create account
               </button>
             ) : null}
@@ -117,29 +146,61 @@ export function LoginForm() {
           <div className="space-y-2">
             <label className="block space-y-1">
               <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">Work email</span>
-              <Input density="default" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" />
+              <Input
+                density="default"
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@company.com"
+              />
             </label>
             {mode !== "magic" ? (
               <label className="block space-y-1">
-                <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">{mode === "accept" ? "Create password" : "Password"}</span>
-                <Input density="default" required type="password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Minimum 6 characters" />
+                <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">
+                  {mode === "accept" ? "Create password" : "Password"}
+                </span>
+                <Input
+                  density="default"
+                  required
+                  type="password"
+                  minLength={6}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Minimum 6 characters"
+                />
               </label>
             ) : null}
-            <Button disabled={loading || !email || (mode !== "magic" && password.length < 6)} className="w-full">
-              {loading ? "Working" : mode === "magic" ? "Send magic link" : mode === "accept" ? "Create account and join" : "Continue"}
+            <Button disabled={submitDisabled()} className="w-full">
+              {submitLabel()}
             </Button>
           </div>
 
-          {message ? <p className="mt-3 rounded-[5px] border border-[var(--line)] bg-[var(--surface-0)] p-2 text-xs leading-5 text-[var(--muted)]">{message}</p> : null}
+          {message ? (
+            <p className="mt-3 rounded-[5px] border border-[var(--line)] bg-[var(--surface-0)] p-2 text-xs leading-5 text-[var(--muted)]">
+              {message}
+            </p>
+          ) : null}
 
           <p className="mt-6 font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">
-            {isInvite ? "Invites expire after 7 days" : <>Need a new organization? <Link href="/signup" className="text-[var(--muted)] hover:text-[var(--text)]">Create one</Link></>}
+            {isInvite ? (
+              "Invites expire after 7 days"
+            ) : (
+              <>
+                Need a new organization?{" "}
+                <Link href="/signup" className="text-[var(--muted)] hover:text-[var(--text)]">
+                  Create one
+                </Link>
+              </>
+            )}
           </p>
         </form>
       </section>
 
       <section className="hidden min-h-0 flex-col justify-between p-6 md:flex">
-        <div className="font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">Multi-tenant realtime chat</div>
+        <div className="font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">
+          Multi-tenant realtime chat
+        </div>
         <div className="max-w-xl">
           <div className="mb-4 grid grid-cols-[88px_1fr] gap-x-4 gap-y-2 border-y border-[var(--line)] py-4 font-mono text-[11px]">
             <span className="text-[var(--faint)]">Auth</span>
@@ -149,7 +210,9 @@ export function LoginForm() {
             <span className="text-[var(--faint)]">Session</span>
             <span className="text-[var(--muted)]">Secure Supabase SSR cookies</span>
           </div>
-          <p className="text-xs leading-5 text-[var(--faint)]">Designed as a work surface: dense, keyboard-first, and quiet until something needs attention.</p>
+          <p className="text-xs leading-5 text-[var(--faint)]">
+            Designed as a work surface: dense, keyboard-first, and quiet until something needs attention.
+          </p>
         </div>
       </section>
     </main>

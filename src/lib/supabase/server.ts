@@ -1,12 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
+import { logger } from "@/lib/logger";
 import { getSupabaseEnv } from "./env";
 
 export async function createSupabaseServerClient() {
   const env = getSupabaseEnv();
 
   if (!env) {
+    logger.error({ scope: "supabase.server" }, "missing Supabase environment variables");
     throw new Error("Missing Supabase environment variables");
   }
 
