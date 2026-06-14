@@ -1,0 +1,94 @@
+droid-wiki/how-to-contribute/patterns-and-conventions.md
+  s_137724e1584a97::t_889b7508554bb6 1-51
+droid-wiki/systems/index.md
+  s_137724e1584a97::t_2e88c03cb935b7 1-32
+droid-wiki/reference/index.md
+  s_137724e1584a97::t_da1859b4b1721c 1-9
+droid-wiki/.wiki-meta.json
+  s_137724e1584a97::t_5d9a7041fc45ad 1-51
+droid-wiki/overview/getting-started.md
+  s_137724e1584a97::t_7bebdc1578e54a 1-91
+droid-wiki/how-to-contribute/index.md
+  s_137724e1584a97::t_9cee6d6ae41a12 1-33
+droid-wiki/features/index.md
+  s_137724e1584a97::t_3b9e303f99abf5 1-26
+droid-wiki/deployment.md
+  s_137724e1584a97::t_1c3bce0f2da6b8 1-44
+droid-wiki/systems/supabase-access-layer.md
+  s_137724e1584a97::t_932023b58a818f 1-62
+droid-wiki/overview/glossary.md
+  s_137724e1584a97::t_f797efc5f3152c 1-25
+droid-wiki/features/realtime-and-optimistic.md
+  s_137724e1584a97::t_f8649d45d6654f 1-58
+droid-wiki/reference/configuration.md
+  s_137724e1584a97::t_6b355b1a565196 1-48
+droid-wiki/reference/data-models.md
+  s_137724e1584a97::t_2aeaa18554d63c 1-73
+droid-wiki/how-to-contribute/debugging.md
+  s_137724e1584a97::t_9525cd706c51f0 1-31
+droid-wiki/fun-facts.md
+  s_137724e1584a97::t_e04cdbafd07bc8 1-27
+droid-wiki/how-to-monitor.md
+  s_137724e1584a97::t_9469f0fb3da846 1-42
+AGENTS.md
+  s_137724e1584a97::t_d2edad33456282 65
+droid-wiki/how-to-contribute/development-workflow.md
+  s_137724e1584a97::t_6504f9aa100870 1-52
+droid-wiki/features/authentication.md
+  s_137724e1584a97::t_644d2b766a8de7 1-73
+droid-wiki/systems/observability.md
+  s_137724e1584a97::t_3b8a830b3f1cbd 1-58
+.factory/skills/supabase-migration/SKILL.md
+  137724e1584a97e0 1-108
+droid-wiki/api.md
+  s_137724e1584a97::t_c9be4831c03884 1-46
+droid-wiki/reference/dependencies.md
+  s_137724e1584a97::t_5a770f8053ad94 1-42
+droid-wiki/features/messaging.md
+  s_137724e1584a97::t_51530d9b3d61dc 1-69
+droid-wiki/features/search.md
+  s_137724e1584a97::t_5bfc6d7e725552 1-51
+droid-wiki/lore.md
+  s_137724e1584a97::t_5de50cb15aefe1 1-37
+droid-wiki/how-to-contribute/tooling.md
+  s_137724e1584a97::t_1bdbae3a9efd29 1-49
+droid-wiki/security.md
+  s_137724e1584a97::t_be041691f9c94f 1-57
+droid-wiki/overview/index.md
+  s_137724e1584a97::t_8b3e2d8d9143aa 1-36
+droid-wiki/overview/architecture.md
+  s_137724e1584a97::t_1e0f9a3323770d 1-83
+droid-wiki/how-to-contribute/testing.md
+  s_137724e1584a97::t_de96771ac186db 1-55
+droid-wiki/by-the-numbers.md
+  s_137724e1584a97::t_a25e032b494325 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "dd302f05c786100050274675d5d3ef46255629e9",
+  "prompts": {
+    "137724e1584a97e0": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 107,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
