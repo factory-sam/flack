@@ -1,0 +1,19 @@
+AGENTS.md
+  s_137724e1584a97::t_c623262166d68b 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "566cad37ddfd00b80bfd643d2a95aa3556540a3d",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
