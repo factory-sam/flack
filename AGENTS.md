@@ -62,7 +62,7 @@ Requires Node 22+, pnpm 11.5.0, the Supabase CLI, and Docker.
 - Tables: `organizations`, `profiles`, `channels`, `channel_members`, `messages`, `reactions`, `attachments`, `mentions`, `notifications`, `invites`.
 - Server-side logic prefers Postgres functions/RPCs (`create_invite`, `accept_invite`, `search_messages`) over ad-hoc client queries for privileged operations.
 - After changing the schema, update `src/types/database.ts` to match, and run `supabase db reset` locally to verify migrations apply cleanly.
-- For the full migration + RLS + types workflow, follow the `supabase-migration` skill in `.factory/skills/supabase-migration/SKILL.md`.
+- For the full migration + RLS + types workflow, follow the `supabase-migration` skill in [`.factory/skills/supabase-migration/SKILL.md`](./.factory/skills/supabase-migration/SKILL.md).
 
 ## Skills
 
