@@ -1,0 +1,34 @@
+src/features/chat/use-channel-realtime.ts
+  s_137724e1584a97::t_5b758365330864 1-129
+src/features/chat/chat-parts.tsx
+  s_137724e1584a97::t_2a62d57f883272 436-437,444-445,452-453,484,493-498
+  s_137724e1584a97::t_425b167f991140 485-492
+  s_137724e1584a97::t_01faf9a4b2e10a 3-4
+  s_137724e1584a97::t_9b9f7f6fe80caa 273-274
+  s_137724e1584a97::t_227a04d6f451a0 475-482
+  s_137724e1584a97::t_ed5dd6602c7487 337-390
+  s_137724e1584a97::t_0a53fb2000ef04 391-430
+  s_137724e1584a97::t_7357a0c6765628 230-231,244-245
+src/features/chat/chat-workspace.tsx
+  s_137724e1584a97::t_37e3384acf17c6 369-387
+  s_137724e1584a97::t_cac99eec87064b 178-188
+  s_137724e1584a97::t_10e9f749cffa6a 515-516
+  s_137724e1584a97::t_0f6941e3c17cf6 565-566
+  s_137724e1584a97::t_a5e43a2e2d06cd 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "ecf15a41729959c6c32c37077ad001b26a2a2d8d",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
