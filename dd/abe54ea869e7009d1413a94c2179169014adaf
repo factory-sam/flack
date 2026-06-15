@@ -1,0 +1,37 @@
+src/features/chat/notification-bell.tsx
+  s_137724e1584a97::t_9257261a643e15 1-88
+vitest.config.ts
+  s_137724e1584a97::t_ee84ca37b57768 25-26
+src/features/chat/chat-workspace.tsx
+  s_137724e1584a97::t_7a9723c82dc347 80
+  s_137724e1584a97::t_94be3041fbd7bc 15-16
+  s_137724e1584a97::t_075342bfdae78c 446-453
+src/features/chat/notifications.test.ts
+  s_137724e1584a97::t_1724123b7df843 1-50
+src/features/chat/notifications.ts
+  s_137724e1584a97::t_02dfe3bbb1fcde 1-27
+src/features/chat/chat-parts.tsx
+  s_137724e1584a97::t_780ca046ec1af2 152-153,158
+  s_137724e1584a97::t_38a546e1a1cf44 173-178
+src/features/chat/use-notifications.ts
+  s_137724e1584a97::t_7e91036f5d79c9 1-36,45-62
+  s_137724e1584a97::t_ee31091ed61931 37-44
+src/types/chat.ts
+  s_137724e1584a97::t_f0d6c7a6378eb9 62-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "ddabe54ea869e7009d1413a94c2179169014adaf",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
