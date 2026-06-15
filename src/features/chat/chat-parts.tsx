@@ -43,12 +43,15 @@ function ChannelIcon({ channel }: { channel: Channel | null }) {
 export function ChannelButton({
   channel,
   active,
+  unread = 0,
   onClick
 }: {
   channel: Channel;
   active: boolean;
+  unread?: number;
   onClick: () => void;
 }) {
+  const hasUnread = unread > 0 && !active;
   return (
     <button
       onClick={onClick}
@@ -56,11 +59,17 @@ export function ChannelButton({
         "flex h-7 w-full items-center gap-1.5 rounded-[5px] px-1.5 text-left text-xs transition-colors",
         active
           ? "bg-[var(--surface-2)] text-[var(--text)]"
-          : "text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+          : "text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]",
+        hasUnread && "font-semibold text-[var(--text)]"
       )}
     >
       <ChannelIcon channel={channel} />
       <span className="truncate">{channelLabel(channel.name, channel.type)}</span>
+      {hasUnread ? (
+        <span className="ml-auto grid h-4 min-w-4 place-items-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-medium text-[var(--bg)]">
+          {unread > 99 ? "99+" : unread}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -223,6 +232,15 @@ function ChannelEmptyState({
   );
 }
 
+function NewMessagesDivider() {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1">
+      <span className="h-px flex-1 bg-[var(--danger)] opacity-40" />
+      <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--danger)]">New</span>
+    </div>
+  );
+}
+
 export function ChannelBody({
   messages,
   activeChannel,
@@ -232,6 +250,7 @@ export function ChannelBody({
   onThread,
   onEdit,
   onDelete,
+  firstUnreadId,
   onDraft,
   onPrepareChannel,
   inviteEmail,
@@ -246,6 +265,7 @@ export function ChannelBody({
   onThread: (message: ChatMessage) => void;
   onEdit?: (message: ChatMessage, nextBody: string) => void;
   onDelete?: (message: ChatMessage) => void;
+  firstUnreadId?: string | null;
   onDraft: () => void;
   onPrepareChannel: () => void;
   inviteEmail: string;
@@ -267,15 +287,17 @@ export function ChannelBody({
       ) : (
         <div>
           {messages.map((message) => (
-            <MessageRow
-              key={message.id}
-              message={message}
-              currentUserId={currentUserId}
-              onReact={onReact}
-              onThread={onThread}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+            <div key={message.id}>
+              {message.id === firstUnreadId ? <NewMessagesDivider /> : null}
+              <MessageRow
+                message={message}
+                currentUserId={currentUserId}
+                onReact={onReact}
+                onThread={onThread}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            </div>
           ))}
         </div>
       )}

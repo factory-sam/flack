@@ -18,7 +18,12 @@ export default defineConfig({
       reportsDirectory: "./coverage",
       // Enforce coverage on the pure logic layer. UI components are exercised
       // by the Playwright e2e suite instead of unit coverage.
-      include: ["src/lib/utils.ts", "src/features/messages/optimistic.ts", "src/features/chat/emoji-recents.ts"],
+      include: [
+        "src/lib/utils.ts",
+        "src/features/messages/optimistic.ts",
+        "src/features/chat/emoji-recents.ts",
+        "src/features/chat/unread.ts"
+      ],
       thresholds: {
         statements: 100,
         branches: 90,

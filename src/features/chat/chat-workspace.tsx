@@ -2,26 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Hash, LogOut, MessageSquare, Plus, Search, Users, X } from "lucide-react";
+import { X } from "lucide-react";
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
 import { markMessageFailed, mergeIncomingMessage, removeMessage } from "@/features/messages/optimistic";
-import {
-  AdminSetupPanel,
-  Avatar,
-  ChannelBody,
-  ChannelButton,
-  ChannelHeader,
-  Composer,
-  CurrentUserBadge,
-  MessageRow,
-  SearchOverlay,
-  SectionTitle
-} from "@/features/chat/chat-parts";
+import { ChannelBody, ChannelHeader, Composer, MessageRow, SearchOverlay } from "@/features/chat/chat-parts";
 import { useChannelRealtime, type TypingState } from "@/features/chat/use-channel-realtime";
+import { WorkspaceSidebar } from "@/features/chat/workspace-sidebar";
+import { useUnread } from "@/features/chat/use-unread";
+import { firstUnreadId } from "@/features/chat/unread";
 
 function buildOptimisticMessage(args: {
   id: string;
@@ -79,9 +69,13 @@ export function ChatWorkspace() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [dividerLastRead, setDividerLastRead] = useState<string | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannel = useRef<RealtimeChannel | null>(null);
+  const lastReadRef = useRef<Record<string, string | null>>({});
   const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? null;
+  const { unreadCounts, refreshUnread, markChannelRead } = useUnread(supabase, user?.id);
+  const firstUnread = firstUnreadId(messages, dividerLastRead, user?.id);
 
   const fetchChannels = useCallback(async () => {
     const { data, error } = await supabase
@@ -151,6 +145,7 @@ export function ChatWorkspace() {
         setProfile(typedProfile);
         setMembers((memberData ?? []) as unknown as Profile[]);
         await fetchChannels();
+        await refreshUnread();
       } finally {
         if (live) setLoading(false);
       }
@@ -160,20 +155,34 @@ export function ChatWorkspace() {
     return () => {
       live = false;
     };
-  }, [fetchChannels, router, supabase]);
+  }, [fetchChannels, refreshUnread, router, supabase]);
+
+  useEffect(() => {
+    for (const channel of channels) {
+      if (!(channel.id in lastReadRef.current)) {
+        lastReadRef.current[channel.id] =
+          channel.channel_members?.find((member) => member.user_id === user?.id)?.last_read_at ?? null;
+      }
+    }
+  }, [channels, user?.id]);
 
   useEffect(() => {
     if (!activeChannelId) return;
     let live = true;
 
+    setDividerLastRead(lastReadRef.current[activeChannelId] ?? null);
     fetchMessages(activeChannelId).then((data) => {
       if (live) setMessages(data);
     });
 
+    const now = new Date().toISOString();
+    lastReadRef.current[activeChannelId] = now;
+    void markChannelRead(activeChannelId, now);
+
     return () => {
       live = false;
     };
-  }, [activeChannelId, fetchMessages]);
+  }, [activeChannelId, fetchMessages, markChannelRead]);
 
   useChannelRealtime({
     supabase,
@@ -408,99 +417,27 @@ export function ChatWorkspace() {
 
   return (
     <main className="grid h-screen grid-cols-[248px_minmax(0,1fr)] overflow-hidden bg-[var(--bg)] text-[var(--text)] lg:grid-cols-[248px_minmax(0,1fr)_360px]">
-      <aside className="flex min-h-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
-        <div className="flex h-11 items-center justify-between border-b border-[var(--line)] px-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="h-2 w-2 rounded-sm bg-[var(--accent)]" />
-            <span className="truncate text-sm font-medium tracking-tight">Flack</span>
-          </div>
-          <button
-            onClick={signOut}
-            className="grid h-7 w-7 place-items-center rounded-[5px] text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-            aria-label="Sign out"
-          >
-            <LogOut size={14} />
-          </button>
-        </div>
-
-        <div className="border-b border-[var(--line)] p-2">
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex h-8 w-full items-center justify-between rounded-[5px] border border-[var(--line)] bg-[var(--surface-0)] px-2 text-xs text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
-          >
-            <span className="flex items-center gap-2">
-              <Search size={13} /> Search
-            </span>
-            <span className="font-mono text-[10px] text-[var(--faint)]">⌘K</span>
-          </button>
-        </div>
-
-        <div className="thin-scrollbar min-h-0 flex-1 overflow-y-auto px-2 py-2">
-          <AdminSetupPanel
-            visible={profile?.role === "admin"}
-            inviteEmail={inviteEmail}
-            onInviteEmail={setInviteEmail}
-            onCreateInvite={createInvite}
-            inviteLink={inviteLink}
-            inviteMessage={inviteMessage}
-          />
-
-          <SectionTitle icon={<Hash size={12} />} label="Channels" />
-          <div className="space-y-px">
-            {publicChannels.map((channel) => (
-              <ChannelButton
-                key={channel.id}
-                channel={channel}
-                active={channel.id === activeChannelId}
-                onClick={() => setActiveChannelId(channel.id)}
-              />
-            ))}
-          </div>
-
-          <div className="mt-2 flex gap-1">
-            <Input
-              density="compact"
-              value={newChannelName}
-              onChange={(event) => setNewChannelName(event.target.value)}
-              placeholder="channel"
-            />
-            <Button size="icon" variant="ghost" onClick={() => createChannel("public")} aria-label="Create channel">
-              <Plus size={13} />
-            </Button>
-          </div>
-
-          <SectionTitle className="mt-4" icon={<MessageSquare size={12} />} label="DMs" />
-          <div className="space-y-px">
-            {dms.map((channel) => (
-              <ChannelButton
-                key={channel.id}
-                channel={channel}
-                active={channel.id === activeChannelId}
-                onClick={() => setActiveChannelId(channel.id)}
-              />
-            ))}
-          </div>
-
-          <SectionTitle className="mt-4" icon={<Users size={12} />} label="People" />
-          <div className="space-y-px">
-            {members
-              .filter((member) => member.id !== user?.id)
-              .slice(0, 10)
-              .map((member) => (
-                <button
-                  key={member.id}
-                  onClick={() => createDm(member.id)}
-                  className="flex h-7 w-full items-center gap-2 rounded-[5px] px-1.5 text-left text-xs text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-                >
-                  <Avatar name={member.display_name ?? member.email ?? "Member"} size="sm" />
-                  <span className="truncate">{member.display_name ?? member.email}</span>
-                </button>
-              ))}
-          </div>
-        </div>
-
-        <CurrentUserBadge profile={profile} user={user} />
-      </aside>
+      <WorkspaceSidebar
+        profile={profile}
+        user={user}
+        onSignOut={signOut}
+        onOpenSearch={() => setSearchOpen(true)}
+        inviteEmail={inviteEmail}
+        onInviteEmail={setInviteEmail}
+        onCreateInvite={createInvite}
+        inviteLink={inviteLink}
+        inviteMessage={inviteMessage}
+        publicChannels={publicChannels}
+        dms={dms}
+        members={members}
+        activeChannelId={activeChannelId}
+        unreadCounts={unreadCounts}
+        onSelectChannel={setActiveChannelId}
+        newChannelName={newChannelName}
+        onNewChannelName={setNewChannelName}
+        onCreateChannel={() => createChannel("public")}
+        onCreateDm={createDm}
+      />
 
       <section className="flex min-w-0 flex-col">
         <ChannelHeader activeChannel={activeChannel} onlineCount={onlineCount} messageCount={messages.length} />
@@ -514,6 +451,7 @@ export function ChatWorkspace() {
           onThread={openThread}
           onEdit={editMessage}
           onDelete={deleteMessage}
+          firstUnreadId={firstUnread}
           onDraft={() => setBody("First update: ")}
           onPrepareChannel={() => setNewChannelName("team-updates")}
           inviteEmail={inviteEmail}
