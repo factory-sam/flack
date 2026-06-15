@@ -18,9 +18,8 @@ jobs:
       - name: Run Factory droid-action
         uses: Factory-AI/droid-action@main
         with:
-          org_id: ${{ secrets.FACTORY_ORG_ID }}
-          api_key: ${{ secrets.FACTORY_API_KEY }}
+          factory_api_key: ${{ secrets.FACTORY_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_review: true
           automatic_security_review: true
           allowed_bots: dependabot
-          prompt: Automatic code review with security review enabled on pull requests.
