@@ -10,6 +10,8 @@ import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
 import { DEFAULT_EMOJIS } from "@/features/chat/emoji-recents";
 import { ReactionPicker } from "@/features/chat/reaction-picker";
 import { MessageBody } from "@/features/chat/message-body";
+import { LinkPreviewCard } from "@/features/chat/link-preview";
+import { extractUrls } from "@/features/chat/unfurl";
 
 const emojiQuick = DEFAULT_EMOJIS.slice(0, 3);
 
@@ -364,6 +366,12 @@ export function SearchOverlay({
   );
 }
 
+function groupReactions(reactions: ChatMessage["reactions"]): Map<string, number> {
+  const grouped = new Map<string, number>();
+  reactions?.forEach((reaction) => grouped.set(reaction.emoji, (grouped.get(reaction.emoji) ?? 0) + 1));
+  return grouped;
+}
+
 function MessageActions({
   message,
   isOwn,
@@ -482,10 +490,8 @@ export function MessageRow({
     (message.author_id === currentUserId ? "You" : "Unknown");
   const isOwn = message.author_id === currentUserId;
   const [editing, setEditing] = useState(false);
-  const groupedReactions = new Map<string, number>();
-  message.reactions?.forEach((reaction) =>
-    groupedReactions.set(reaction.emoji, (groupedReactions.get(reaction.emoji) ?? 0) + 1)
-  );
+  const previewUrl = extractUrls(message.body)[0];
+  const groupedReactions = groupReactions(message.reactions);
 
   return (
     <article
@@ -522,10 +528,13 @@ export function MessageRow({
             }}
           />
         ) : (
-          <div className="flex flex-wrap items-baseline">
-            <MessageBody body={message.body} />
-            {message.edited_at ? <span className="ml-1 text-[10px] text-[var(--faint)]">(edited)</span> : null}
-          </div>
+          <>
+            <div className="flex flex-wrap items-baseline">
+              <MessageBody body={message.body} />
+              {message.edited_at ? <span className="ml-1 text-[10px] text-[var(--faint)]">(edited)</span> : null}
+            </div>
+            {!message.pending && previewUrl ? <LinkPreviewCard url={previewUrl} /> : null}
+          </>
         )}
         {message.attachments?.length ? (
           <div className="mt-1 flex flex-wrap gap-1">
