@@ -1,0 +1,39 @@
+src/features/chat/workspace-sidebar.tsx
+  s_137724e1584a97::t_72cf3e4ea4fd11 1-148
+src/features/chat/unread.ts
+  s_137724e1584a97::t_0b1b1168f5b745 1-20
+src/features/chat/use-unread.ts
+  s_137724e1584a97::t_c047e3a32513d6 1-39
+src/features/chat/unread.test.ts
+  s_137724e1584a97::t_a55975a9b235f0 1-74
+vitest.config.ts
+  s_137724e1584a97::t_38d6bd74a78d46 21-26
+src/features/chat/chat-workspace.tsx
+  s_137724e1584a97::t_06926ba8856726 420-440
+  s_137724e1584a97::t_f5d984c3b70718 454
+  s_137724e1584a97::t_ea8bf6daabc83e 148,158
+  s_137724e1584a97::t_7e48066a92567c 161-167,173,178-181,185
+  s_137724e1584a97::t_a2070b0d4837ce 5,10,12-14
+  s_137724e1584a97::t_15b9cc0a8af632 72,75,77-78
+src/features/chat/chat-parts.tsx
+  s_137724e1584a97::t_628f167929e0cc 290-300
+  s_137724e1584a97::t_089a040e11a78e 46,51,54,62-63,68-72
+  s_137724e1584a97::t_16eeb7f3684e43 253,268
+  s_137724e1584a97::t_c3df6e3b449f98 235-243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "377e4214126a4e1cc5edb52718d93f7e587ca165",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
