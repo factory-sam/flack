@@ -34,7 +34,7 @@ Requires Node 22+, pnpm 11.5.0, the Supabase CLI, and Docker.
 
 **Before committing or finishing a task, run:** `pnpm lint && pnpm typecheck && pnpm test`. The Husky `pre-commit` hook enforces `lint-staged` (Prettier check + ESLint with `--max-warnings=0`), `pnpm typecheck`, and `pnpm tech-debt`, so commits fail on any lint warning, format drift, type error, or untracked TODO marker. The `Code Quality` GitHub Actions workflow (`.github/workflows/code-quality.yml`) additionally runs `knip`, `jscpd`, and the tech-debt scan on every push and PR.
 
-**Build performance:** the same workflow has a separate `build` job that restores the Next.js incremental cache (`.next/cache`, keyed on the lockfile and source hash via `actions/cache`) so rebuilds reuse compiler work, then runs `pnpm build:metrics`. `scripts/build-metrics.mjs` times the production build, writes `reports/build-metrics.json` (duration, cache-hit, Next/Node versions, commit), appends a summary to the GitHub job page, and uploads the JSON as a `build-metrics` artifact so build-duration regressions are visible across runs.
+**Build performance:** the same workflow has a separate `build` job that restores the Next.js incremental cache (`.next/cache`, keyed on the lockfile and source hash via `actions/cache`) so rebuilds reuse compiler work, then runs `pnpm build:metrics`. `scripts/build-metrics.mjs` times the production build, writes `reports/build-metrics.json` (duration, `cacheRestored` flag, Next/Node versions, commit), appends a summary to the GitHub job page, and uploads the JSON as a `build-metrics` artifact so build-duration regressions are visible across runs.
 
 ## Conventions
 

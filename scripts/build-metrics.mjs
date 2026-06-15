@@ -24,10 +24,20 @@ function runBuild() {
   return new Promise((resolveRun) => {
     const start = process.hrtime.bigint();
     const child = spawn("pnpm", ["build"], { stdio: "inherit", cwd: repoRoot, env: process.env });
-    child.on("close", (code) => {
+
+    let settled = false;
+    const settle = (code) => {
+      if (settled) return;
+      settled = true;
       const durationMs = Number((process.hrtime.bigint() - start) / 1_000_000n);
       resolveRun({ code: code ?? 1, durationMs });
+    };
+
+    child.on("error", (err) => {
+      console.error("Failed to run pnpm build", err);
+      settle(1);
     });
+    child.on("close", (code) => settle(code));
   });
 }
 
