@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Hash, Lock, MessageSquare, Paperclip, Plus, Search, Send } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Hash, Lock, MessageSquare, Paperclip, Pencil, Plus, Search, Send, Trash2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -227,6 +227,8 @@ export function ChannelBody({
   currentUserId,
   onReact,
   onThread,
+  onEdit,
+  onDelete,
   onDraft,
   onPrepareChannel,
   inviteEmail,
@@ -239,6 +241,8 @@ export function ChannelBody({
   currentUserId?: string;
   onReact: (message: ChatMessage, emoji: string) => void;
   onThread: (message: ChatMessage) => void;
+  onEdit?: (message: ChatMessage, nextBody: string) => void;
+  onDelete?: (message: ChatMessage) => void;
   onDraft: () => void;
   onPrepareChannel: () => void;
   inviteEmail: string;
@@ -266,6 +270,8 @@ export function ChannelBody({
               currentUserId={currentUserId}
               onReact={onReact}
               onThread={onThread}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
         </div>
@@ -328,23 +334,123 @@ export function SearchOverlay({
   );
 }
 
+function MessageActions({
+  message,
+  isOwn,
+  onReact,
+  onThread,
+  onEdit,
+  onDelete
+}: {
+  message: ChatMessage;
+  isOwn: boolean;
+  onReact: (message: ChatMessage, emoji: string) => void;
+  onThread: (message: ChatMessage) => void;
+  onEdit?: () => void;
+  onDelete?: (message: ChatMessage) => void;
+}) {
+  return (
+    <div className="ml-auto hidden items-center gap-1 group-hover:flex">
+      {emojiQuick.map((emoji) => (
+        <button
+          key={emoji}
+          onClick={() => onReact(message, emoji)}
+          className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
+        >
+          {displayEmoji(emoji)}
+        </button>
+      ))}
+      <button
+        onClick={() => onThread(message)}
+        className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] uppercase text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
+      >
+        reply
+      </button>
+      {isOwn && onEdit ? (
+        <button
+          onClick={onEdit}
+          className="grid h-5 w-5 place-items-center rounded-[4px] border border-[var(--line)] text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
+          aria-label="Edit message"
+        >
+          <Pencil size={11} />
+        </button>
+      ) : null}
+      {isOwn && onDelete ? (
+        <button
+          onClick={() => onDelete(message)}
+          className="grid h-5 w-5 place-items-center rounded-[4px] border border-[var(--line)] text-[var(--muted)] hover:border-[var(--danger)] hover:text-[var(--danger)]"
+          aria-label="Delete message"
+        >
+          <Trash2 size={11} />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function MessageEditor({
+  initial,
+  onSave,
+  onCancel
+}: {
+  initial: string;
+  onSave: (value: string) => void;
+  onCancel: () => void;
+}) {
+  const [draft, setDraft] = useState(initial);
+  const save = () => {
+    if (draft.trim()) onSave(draft);
+  };
+
+  return (
+    <div className="mt-1 space-y-1">
+      <Textarea
+        density="compact"
+        autoFocus
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onCancel();
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") save();
+        }}
+        rows={2}
+      />
+      <div className="flex items-center gap-1.5 text-[10px]">
+        <Button size="sm" onClick={save}>
+          Save
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+        <span className="text-[var(--faint)]">Esc to cancel</span>
+      </div>
+    </div>
+  );
+}
+
 export function MessageRow({
   message,
   currentUserId,
   onReact,
   onThread,
+  onEdit,
+  onDelete,
   compact = false
 }: {
   message: ChatMessage;
   currentUserId?: string;
   onReact: (message: ChatMessage, emoji: string) => void;
   onThread: (message: ChatMessage) => void;
+  onEdit?: (message: ChatMessage, nextBody: string) => void;
+  onDelete?: (message: ChatMessage) => void;
   compact?: boolean;
 }) {
   const author =
     message.profiles?.display_name ??
     message.profiles?.email ??
     (message.author_id === currentUserId ? "You" : "Unknown");
+  const isOwn = message.author_id === currentUserId;
+  const [editing, setEditing] = useState(false);
   const groupedReactions = new Map<string, number>();
   message.reactions?.forEach((reaction) =>
     groupedReactions.set(reaction.emoji, (groupedReactions.get(reaction.emoji) ?? 0) + 1)
@@ -366,25 +472,30 @@ export function MessageRow({
           <span className="truncate text-xs font-medium text-[var(--text)]">{author}</span>
           {message.pending ? <span className="font-mono text-[10px] uppercase text-[var(--warn)]">sending</span> : null}
           {message.failed ? <span className="font-mono text-[10px] uppercase text-[var(--danger)]">failed</span> : null}
-          <div className="ml-auto hidden items-center gap-1 group-hover:flex">
-            {emojiQuick.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => onReact(message, emoji)}
-                className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
-              >
-                {displayEmoji(emoji)}
-              </button>
-            ))}
-            <button
-              onClick={() => onThread(message)}
-              className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] uppercase text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
-            >
-              reply
-            </button>
-          </div>
+          <MessageActions
+            message={message}
+            isOwn={isOwn}
+            onReact={onReact}
+            onThread={onThread}
+            onEdit={onEdit ? () => setEditing(true) : undefined}
+            onDelete={onDelete}
+          />
         </div>
-        <p className="whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--text)]">{message.body}</p>
+        {editing ? (
+          <MessageEditor
+            initial={message.body}
+            onCancel={() => setEditing(false)}
+            onSave={(value) => {
+              onEdit?.(message, value);
+              setEditing(false);
+            }}
+          />
+        ) : (
+          <p className="whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--text)]">
+            {message.body}
+            {message.edited_at ? <span className="ml-1 text-[10px] text-[var(--faint)]">(edited)</span> : null}
+          </p>
+        )}
         {message.attachments?.length ? (
           <div className="mt-1 flex flex-wrap gap-1">
             {message.attachments.map((attachment) => (

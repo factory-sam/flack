@@ -21,27 +21,7 @@ import {
   SearchOverlay,
   SectionTitle
 } from "@/features/chat/chat-parts";
-
-type TypingState = Record<string, { name: string; at: number }>;
-
-type DbMessagePayload = {
-  id: string;
-  channel_id: string;
-  author_id: string;
-  body: string;
-  parent_id: string | null;
-  edited_at: string | null;
-  deleted_at: string | null;
-  created_at: string;
-};
-
-function payloadRecord(payload: { record?: DbMessagePayload; new?: DbMessagePayload; new_record?: DbMessagePayload }) {
-  return payload.record ?? payload.new ?? payload.new_record;
-}
-
-function payloadOldRecord(payload: { old_record?: DbMessagePayload; old?: DbMessagePayload }) {
-  return payload.old_record ?? payload.old;
-}
+import { useChannelRealtime, type TypingState } from "@/features/chat/use-channel-realtime";
 
 function buildOptimisticMessage(args: {
   id: string;
@@ -195,81 +175,17 @@ export function ChatWorkspace() {
     };
   }, [activeChannelId, fetchMessages]);
 
-  useEffect(() => {
-    if (!activeChannelId || !user) return;
-
-    const channel: RealtimeChannel = supabase.channel(`channel:${activeChannelId}`, {
-      config: {
-        private: true,
-        broadcast: { self: true },
-        presence: { key: user.id }
-      }
-    });
-
-    realtimeChannel.current = channel;
-
-    channel
-      .on("broadcast", { event: "INSERT" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const record = payloadRecord(payload);
-        if (!record || record.channel_id !== activeChannelId || record.parent_id) return;
-        setMessages((current) => mergeIncomingMessage(current, record));
-      })
-      .on("broadcast", { event: "UPDATE" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const record = payloadRecord(payload);
-        if (!record || record.channel_id !== activeChannelId || record.parent_id) return;
-        setMessages((current) => mergeIncomingMessage(current, record));
-      })
-      .on("broadcast", { event: "DELETE" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const oldRecord = payloadOldRecord(payload);
-        if (!oldRecord || oldRecord.channel_id !== activeChannelId) return;
-        setMessages((current) => removeMessage(current, oldRecord.id));
-      })
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (!payload || payload.user_id === user.id) return;
-        setTyping((current) => ({
-          ...current,
-          [payload.user_id]: { name: payload.name ?? "Someone", at: Date.now() }
-        }));
-      })
-      .on("presence", { event: "sync" }, () => {
-        setOnlineCount(Object.keys(channel.presenceState()).length || 1);
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            user_id: user.id,
-            name: profile?.display_name ?? user.email,
-            online_at: new Date().toISOString()
-          });
-        }
-      });
-
-    const cleanupTyping = window.setInterval(() => {
-      const now = Date.now();
-      setTyping((current) => Object.fromEntries(Object.entries(current).filter(([, value]) => now - value.at < 3500)));
-    }, 1500);
-
-    return () => {
-      window.clearInterval(cleanupTyping);
-      realtimeChannel.current = null;
-      supabase.removeChannel(channel);
-    };
-  }, [activeChannelId, fetchMessages, profile?.display_name, supabase, user]);
+  useChannelRealtime({
+    supabase,
+    activeChannelId,
+    user,
+    displayName: profile?.display_name,
+    fetchMessages,
+    setMessages,
+    setTyping,
+    setOnlineCount,
+    channelRef: realtimeChannel
+  });
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -450,6 +366,25 @@ export function ChatWorkspace() {
     if (activeChannelId) setMessages(await fetchMessages(activeChannelId));
   }
 
+  async function editMessage(message: ChatMessage, nextBody: string) {
+    const text = nextBody.trim();
+    if (!user || !text || text === message.body) return;
+    const now = new Date().toISOString();
+    const apply = (list: ChatMessage[]) =>
+      list.map((item) => (item.id === message.id ? { ...item, body: text, edited_at: now } : item));
+    setMessages(apply);
+    setThreadMessages(apply);
+    setThreadRoot((current) => (current?.id === message.id ? { ...current, body: text, edited_at: now } : current));
+    await supabase.from("messages").update({ body: text, edited_at: now }).eq("id", message.id);
+  }
+
+  async function deleteMessage(message: ChatMessage) {
+    if (!user) return;
+    setMessages((current) => removeMessage(current, message.id));
+    setThreadMessages((current) => removeMessage(current, message.id));
+    await supabase.from("messages").update({ deleted_at: new Date().toISOString() }).eq("id", message.id);
+  }
+
   async function openThread(message: ChatMessage) {
     setThreadRoot(message);
     setThreadMessages(await fetchMessages(message.channel_id, message.id));
@@ -577,6 +512,8 @@ export function ChatWorkspace() {
           currentUserId={user?.id}
           onReact={toggleReaction}
           onThread={openThread}
+          onEdit={editMessage}
+          onDelete={deleteMessage}
           onDraft={() => setBody("First update: ")}
           onPrepareChannel={() => setNewChannelName("team-updates")}
           inviteEmail={inviteEmail}
@@ -625,6 +562,8 @@ export function ChatWorkspace() {
                   currentUserId={user?.id}
                   onReact={toggleReaction}
                   onThread={openThread}
+                  onEdit={editMessage}
+                  onDelete={deleteMessage}
                   compact
                 />
               ))}
