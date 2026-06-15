@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { channelLabel, cn, formatTime, initials } from "@/lib/utils";
 import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
+import { DEFAULT_EMOJIS } from "@/features/chat/emoji-recents";
+import { ReactionPicker } from "@/features/chat/reaction-picker";
 
-const emojiQuick = ["+1", "eyes", "check"];
+const emojiQuick = DEFAULT_EMOJIS.slice(0, 3);
 
 function displayEmoji(token: string) {
   if (token === "+1") return "👍";
@@ -355,11 +357,12 @@ function MessageActions({
         <button
           key={emoji}
           onClick={() => onReact(message, emoji)}
-          className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
+          className="grid h-5 w-5 place-items-center rounded-[4px] border border-[var(--line)] text-[11px] text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
         >
-          {displayEmoji(emoji)}
+          {emoji}
         </button>
       ))}
+      <ReactionPicker onSelect={(emoji) => onReact(message, emoji)} />
       <button
         onClick={() => onThread(message)}
         className="h-5 rounded-[4px] border border-[var(--line)] px-1.5 font-mono text-[10px] uppercase text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"

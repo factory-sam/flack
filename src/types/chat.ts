@@ -17,15 +17,6 @@ export type Profile = {
   last_seen_at: string | null;
 };
 
-export type AppNotification = {
-  id: string;
-  user_id: string;
-  type: "mention" | "thread" | "dm" | "reaction";
-  message_id: string | null;
-  read_at: string | null;
-  created_at: string;
-};
-
 export type Channel = {
   id: string;
   org_id: string;
