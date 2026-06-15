@@ -5,10 +5,13 @@ name: Code Review
   pull_request:
     types:
       - opened
+      - synchronize
+      - reopened
 permissions:
   contents: read
   pull-requests: write
   issues: write
+  id-token: write
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -16,11 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run Factory droid-action
-        uses: Factory-AI/droid-action@main
+        uses: Factory-AI/droid-action@7c7bfea2aa3bb7ea87579402cc1d89dbcf6b13b3 # main
         with:
-          org_id: ${{ secrets.FACTORY_ORG_ID }}
-          api_key: ${{ secrets.FACTORY_API_KEY }}
+          factory_api_key: ${{ secrets.FACTORY_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_review: true
           automatic_security_review: true
           allowed_bots: dependabot
-          prompt: Automatic code review with security review enabled on pull requests.
