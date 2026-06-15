@@ -59,6 +59,18 @@ export type ChatMessage = {
   attachments?: Attachment[];
 };
 
+export type NotificationType = "mention" | "thread" | "dm" | "reaction";
+
+export type AppNotification = {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  message_id: string | null;
+  read_at: string | null;
+  created_at: string;
+  messages?: { body: string; channel_id: string } | null;
+};
+
 export type SearchHit = {
   id: string;
   channel_id: string;

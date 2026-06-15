@@ -12,6 +12,8 @@ import { useChannelRealtime, type TypingState } from "@/features/chat/use-channe
 import { WorkspaceSidebar } from "@/features/chat/workspace-sidebar";
 import { useUnread } from "@/features/chat/use-unread";
 import { firstUnreadId } from "@/features/chat/unread";
+import { useNotifications } from "@/features/chat/use-notifications";
+import { NotificationBell } from "@/features/chat/notification-bell";
 
 function buildOptimisticMessage(args: {
   id: string;
@@ -75,6 +77,7 @@ export function ChatWorkspace() {
   const lastReadRef = useRef<Record<string, string | null>>({});
   const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? null;
   const { unreadCounts, refreshUnread, markChannelRead } = useUnread(supabase, user?.id);
+  const { notifications, markAllRead } = useNotifications(supabase, user?.id, refreshUnread);
   const firstUnread = firstUnreadId(messages, dividerLastRead, user?.id);
 
   const fetchChannels = useCallback(async () => {
@@ -440,7 +443,14 @@ export function ChatWorkspace() {
       />
 
       <section className="flex min-w-0 flex-col">
-        <ChannelHeader activeChannel={activeChannel} onlineCount={onlineCount} messageCount={messages.length} />
+        <ChannelHeader
+          activeChannel={activeChannel}
+          onlineCount={onlineCount}
+          messageCount={messages.length}
+          actions={
+            <NotificationBell notifications={notifications} onMarkAllRead={markAllRead} onSelect={setActiveChannelId} />
+          }
+        />
 
         <ChannelBody
           messages={messages}

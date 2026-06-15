@@ -149,11 +149,13 @@ export function AdminSetupPanel({
 export function ChannelHeader({
   activeChannel,
   onlineCount,
-  messageCount
+  messageCount,
+  actions
 }: {
   activeChannel: Channel | null;
   onlineCount: number;
   messageCount: number;
+  actions?: ReactNode;
 }) {
   return (
     <header className="flex h-11 items-center justify-between border-b border-[var(--line)] bg-[var(--surface-0)] px-4">
@@ -168,9 +170,12 @@ export function ChannelHeader({
           </span>
         ) : null}
       </div>
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">
-        <span>{onlineCount} online</span>
-        <span>{messageCount} messages</span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-[var(--faint)]">
+          <span>{onlineCount} online</span>
+          <span>{messageCount} messages</span>
+        </div>
+        {actions}
       </div>
     </header>
   );
