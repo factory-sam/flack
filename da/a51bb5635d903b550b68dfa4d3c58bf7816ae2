@@ -1,0 +1,21 @@
+scripts/build-metrics.mjs
+  s_137724e1584a97::t_aad62ecb435898 27-31,34-38,40
+AGENTS.md
+  s_137724e1584a97::t_0497091cbef0c1 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "daa51bb5635d903b550b68dfa4d3c58bf7816ae2",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
