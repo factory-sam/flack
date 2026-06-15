@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:metrics": "node scripts/build-metrics.mjs",
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier . --write",
