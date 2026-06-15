@@ -1,0 +1,22 @@
+src/features/chat/message-body.tsx
+  s_137724e1584a97::t_db98ddd8502707 1-44
+src/features/chat/chat-parts.tsx
+  s_137724e1584a97::t_5502e3cf666f76 498-499,501
+  s_137724e1584a97::t_2900011cdc3a14 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "8b70d3a408a09f7fd2c1bb9c4247410a3645ab3a",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
