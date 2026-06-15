@@ -1,0 +1,24 @@
+.github/workflows/code-quality.yml
+  s_137724e1584a97::t_574d3d44a897e6 62-107
+AGENTS.md
+  s_137724e1584a97::t_cfd546540c5fb8 37-38
+  s_137724e1584a97::t_96ffc9a30ae158 22
+package.json
+  s_137724e1584a97::t_0baddff901d981 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "e1e8b23b46f0c3a0f3fd464d6c02d1bcf4ad54ce",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
