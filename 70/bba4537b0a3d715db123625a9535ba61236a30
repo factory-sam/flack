@@ -1,0 +1,42 @@
+src/features/chat/status-control.tsx
+  s_137724e1584a97::t_2794f40ebd0cdc 1-9,11-41,43,45-147
+  s_137724e1584a97::t_a59e715829627d 42,44
+  s_137724e1584a97::t_20448b63d7f719 10
+src/features/chat/chat-workspace.tsx
+  s_137724e1584a97::t_edc35aa279dcfe 77,81,84-88
+  s_137724e1584a97::t_fa6fa71d22d27a 478-486
+  s_137724e1584a97::t_edfd50155a2d40 236-241
+  s_137724e1584a97::t_bd8d2b18a80838 588-593
+  s_137724e1584a97::t_870f396e9632b4 8,17-18
+  s_137724e1584a97::t_14bb37e40b9401 242-245
+  s_137724e1584a97::t_607a39a1ad19ba 423-439
+vitest.config.ts
+  s_137724e1584a97::t_ddf00b433913d3 26-27
+src/features/chat/use-now.ts
+  s_137724e1584a97::t_1de597d34861ba 1-12
+src/features/chat/workspace-sidebar.tsx
+  s_137724e1584a97::t_49c9172664953b 144-149,151-153,159
+  s_137724e1584a97::t_3d85e456831b2c 11
+  s_137724e1584a97::t_bcdd22eff2fd7e 3,10,32-33,54
+  s_137724e1584a97::t_dc8cceb3af29b3 56
+src/features/chat/status.ts
+  s_137724e1584a97::t_2eb47f2b9d28df 1-46
+src/features/chat/status.test.ts
+  s_137724e1584a97::t_c6c71d970140fd 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "70bba4537b0a3d715db123625a9535ba61236a30",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
