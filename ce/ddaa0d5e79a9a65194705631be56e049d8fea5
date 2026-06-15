@@ -1,0 +1,24 @@
+README.md
+  s_137724e1584a97::t_3bd05ca055b870 19,21-22,24-27
+  s_137724e1584a97::t_0561d7da1252b9 142,144
+AGENTS.md
+  s_137724e1584a97::t_6a8978e85429ec 63-64
+  s_137724e1584a97::t_04b086ad5c8e31 54-55
+  s_137724e1584a97::t_c7a189f700865e 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "ceddaa0d5e79a9a65194705631be56e049d8fea5",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
