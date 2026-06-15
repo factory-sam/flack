@@ -1,0 +1,27 @@
+supabase/migrations/003_tier0_parity.sql
+  s_137724e1584a97::t_d0459b8c970413 1-152
+src/types/chat.ts
+  s_137724e1584a97::t_2cb9a226da4a52 3-4,12-15,20-26
+src/types/database.ts
+  s_137724e1584a97::t_408665d2e4a24a 100-107
+  s_137724e1584a97::t_7842055ca172f2 115-118
+  s_137724e1584a97::t_4704491b95a2f4 25-28
+src/features/chat/chat-workspace.tsx
+  s_137724e1584a97::t_81255a60bd2243 154-155,158,165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "19b7be4d15e2bfd82383f0dea27e9c84a7f55875",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
