@@ -1,0 +1,33 @@
+vitest.config.ts
+  s_137724e1584a97::t_855fcf524ee1fa 21
+src/features/chat/emoji-recents.ts
+  s_137724e1584a97::t_ccbbff37841d3e 1-9,11-21,23-29
+  s_137724e1584a97::t_f5a8b185eb2b36 22
+  s_137724e1584a97::t_557278376c0e45 10
+src/features/chat/reaction-picker.tsx
+  s_137724e1584a97::t_7390a92d6d1e44 1-4,6,26-32,35-91,93-100
+  s_137724e1584a97::t_00f2446f036502 5,7-25
+  s_137724e1584a97::t_43375fcc3ad3ab 92
+  s_137724e1584a97::t_d4575ed8c80364 33-34
+src/features/chat/emoji-recents.test.ts
+  s_137724e1584a97::t_fc2d1a6075912b 1-63
+src/features/chat/chat-parts.tsx
+  s_137724e1584a97::t_5e5b5391bf5d2b 360,362,365
+  s_137724e1584a97::t_b51145764ae77b 10-11,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "c6ebca3c2afe36442cbe32fe405d074198c3af52",
+  "prompts": {},
+  "sessions": {
+    "s_137724e1584a97": {
+      "agent_id": {
+        "tool": "droid",
+        "id": "30e22e53-776e-4fd9-a631-143c04b7ac4a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Sam Fitzgerald <sam@factory.ai>"
+    }
+  }
+}
