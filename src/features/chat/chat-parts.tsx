@@ -9,6 +9,7 @@ import { channelLabel, cn, formatTime, initials } from "@/lib/utils";
 import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
 import { DEFAULT_EMOJIS } from "@/features/chat/emoji-recents";
 import { ReactionPicker } from "@/features/chat/reaction-picker";
+import { MessageBody } from "@/features/chat/message-body";
 
 const emojiQuick = DEFAULT_EMOJIS.slice(0, 3);
 
@@ -494,10 +495,10 @@ export function MessageRow({
             }}
           />
         ) : (
-          <p className="whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--text)]">
-            {message.body}
+          <div className="flex flex-wrap items-baseline">
+            <MessageBody body={message.body} />
             {message.edited_at ? <span className="ml-1 text-[10px] text-[var(--faint)]">(edited)</span> : null}
-          </p>
+          </div>
         )}
         {message.attachments?.length ? (
           <div className="mt-1 flex flex-wrap gap-1">
