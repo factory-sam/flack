@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
+import type { Channel, ChatMessage, PresenceState, Profile, SearchHit } from "@/types/chat";
 import { markMessageFailed, mergeIncomingMessage, removeMessage } from "@/features/messages/optimistic";
 import { ChannelBody, ChannelHeader, Composer, MessageRow, SearchOverlay } from "@/features/chat/chat-parts";
 import { useChannelRealtime, type TypingState } from "@/features/chat/use-channel-realtime";
@@ -14,6 +14,8 @@ import { useUnread } from "@/features/chat/use-unread";
 import { firstUnreadId } from "@/features/chat/unread";
 import { useNotifications } from "@/features/chat/use-notifications";
 import { NotificationBell } from "@/features/chat/notification-bell";
+import { StatusControl } from "@/features/chat/status-control";
+import { expiryFromMinutes } from "@/features/chat/status";
 
 function buildOptimisticMessage(args: {
   id: string;
@@ -72,12 +74,18 @@ export function ChatWorkspace() {
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
   const [dividerLastRead, setDividerLastRead] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannel = useRef<RealtimeChannel | null>(null);
   const lastReadRef = useRef<Record<string, string | null>>({});
+  const presenceRef = useRef<PresenceState>("active");
   const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? null;
   const { unreadCounts, refreshUnread, markChannelRead } = useUnread(supabase, user?.id);
-  const { notifications, markAllRead } = useNotifications(supabase, user?.id, refreshUnread);
+  const onNotification = useCallback(() => {
+    void refreshUnread();
+    if (presenceRef.current !== "dnd") setToast("New activity");
+  }, [refreshUnread]);
+  const { notifications, markAllRead } = useNotifications(supabase, user?.id, onNotification);
   const firstUnread = firstUnreadId(messages, dividerLastRead, user?.id);
 
   const fetchChannels = useCallback(async () => {
@@ -224,6 +232,16 @@ export function ChatWorkspace() {
 
     return () => window.clearTimeout(timeout);
   }, [searchQuery, supabase]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  useEffect(() => {
+    presenceRef.current = profile?.presence ?? "active";
+  }, [profile?.presence]);
 
   async function createChannel(type: "public" | "private") {
     if (!user || !profile) return;
@@ -402,6 +420,23 @@ export function ChatWorkspace() {
     setThreadMessages(await fetchMessages(message.channel_id, message.id));
   }
 
+  async function updatePresence(presence: PresenceState) {
+    if (!user || !profile) return;
+    setProfile({ ...profile, presence });
+    await supabase.from("profiles").update({ presence }).eq("id", user.id);
+  }
+
+  async function saveStatus(emoji: string | null, text: string, minutes: number) {
+    if (!user || !profile) return;
+    const next = {
+      status_emoji: emoji,
+      status_text: text || null,
+      status_expires_at: expiryFromMinutes(minutes, Date.now())
+    };
+    setProfile({ ...profile, ...next });
+    await supabase.from("profiles").update(next).eq("id", user.id);
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     router.refresh();
@@ -440,6 +475,15 @@ export function ChatWorkspace() {
         onNewChannelName={setNewChannelName}
         onCreateChannel={() => createChannel("public")}
         onCreateDm={createDm}
+        footer={
+          <StatusControl
+            profile={profile}
+            user={user}
+            onPresence={updatePresence}
+            onSaveStatus={saveStatus}
+            onClearStatus={() => saveStatus(null, "", 0)}
+          />
+        }
       />
 
       <section className="flex min-w-0 flex-col">
@@ -541,6 +585,12 @@ export function ChatWorkspace() {
           setSearchOpen(false);
         }}
       />
+
+      {toast ? (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-40 rounded-[6px] border border-[var(--line-strong)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] shadow-xl shadow-black/40">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -23,7 +23,8 @@ export default defineConfig({
         "src/features/messages/optimistic.ts",
         "src/features/chat/emoji-recents.ts",
         "src/features/chat/unread.ts",
-        "src/features/chat/notifications.ts"
+        "src/features/chat/notifications.ts",
+        "src/features/chat/status.ts"
       ],
       thresholds: {
         statements: 100,

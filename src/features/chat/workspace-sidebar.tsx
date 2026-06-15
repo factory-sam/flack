@@ -1,11 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Hash, LogOut, MessageSquare, Plus, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Channel, Profile } from "@/types/chat";
 import { AdminSetupPanel, Avatar, ChannelButton, CurrentUserBadge, SectionTitle } from "@/features/chat/chat-parts";
+import { presenceDotClass, statusActive } from "@/features/chat/status";
+import { useNow } from "@/features/chat/use-now";
 
 export function WorkspaceSidebar({
   profile,
@@ -26,7 +29,8 @@ export function WorkspaceSidebar({
   newChannelName,
   onNewChannelName,
   onCreateChannel,
-  onCreateDm
+  onCreateDm,
+  footer
 }: {
   profile: Profile | null;
   user: User | null;
@@ -47,7 +51,9 @@ export function WorkspaceSidebar({
   onNewChannelName: (value: string) => void;
   onCreateChannel: () => void;
   onCreateDm: (targetId: string) => void;
+  footer?: ReactNode;
 }) {
+  const now = useNow();
   return (
     <aside className="flex min-h-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
       <div className="flex h-11 items-center justify-between border-b border-[var(--line)] px-3">
@@ -135,14 +141,22 @@ export function WorkspaceSidebar({
                 onClick={() => onCreateDm(member.id)}
                 className="flex h-7 w-full items-center gap-2 rounded-[5px] px-1.5 text-left text-xs text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
               >
-                <Avatar name={member.display_name ?? member.email ?? "Member"} size="sm" />
+                <span className="relative">
+                  <Avatar name={member.display_name ?? member.email ?? "Member"} size="sm" />
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[var(--surface)] ${presenceDotClass(member.presence)}`}
+                  />
+                </span>
                 <span className="truncate">{member.display_name ?? member.email}</span>
+                {statusActive(member, now) && member.status_emoji ? (
+                  <span className="ml-auto text-xs">{member.status_emoji}</span>
+                ) : null}
               </button>
             ))}
         </div>
       </div>
 
-      <CurrentUserBadge profile={profile} user={user} />
+      {footer ?? <CurrentUserBadge profile={profile} user={user} />}
     </aside>
   );
 }
