@@ -151,16 +151,18 @@ export function ChatWorkspace() {
           return;
         }
 
+        const profileColumns =
+          "id,org_id,email,display_name,avatar_url,status,status_emoji,status_text,status_expires_at,presence,role,last_seen_at";
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("id,org_id,email,display_name,avatar_url,status,role,last_seen_at")
+          .select(profileColumns)
           .eq("id", authUser.id)
           .single();
         const typedProfile = profileData as unknown as Profile | null;
         const { data: memberData } = typedProfile
           ? await supabase
               .from("profiles")
-              .select("id,org_id,email,display_name,avatar_url,status,role,last_seen_at")
+              .select(profileColumns)
               .eq("org_id", typedProfile.org_id)
               .order("display_name", { ascending: true })
           : { data: [] };
