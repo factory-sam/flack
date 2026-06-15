@@ -2,46 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Hash, LogOut, MessageSquare, Plus, Search, Users, X } from "lucide-react";
+import { X } from "lucide-react";
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { Channel, ChatMessage, Profile, SearchHit } from "@/types/chat";
+import type { Channel, ChatMessage, PresenceState, Profile, SearchHit } from "@/types/chat";
 import { markMessageFailed, mergeIncomingMessage, removeMessage } from "@/features/messages/optimistic";
-import {
-  AdminSetupPanel,
-  Avatar,
-  ChannelBody,
-  ChannelButton,
-  ChannelHeader,
-  Composer,
-  CurrentUserBadge,
-  MessageRow,
-  SearchOverlay,
-  SectionTitle
-} from "@/features/chat/chat-parts";
-
-type TypingState = Record<string, { name: string; at: number }>;
-
-type DbMessagePayload = {
-  id: string;
-  channel_id: string;
-  author_id: string;
-  body: string;
-  parent_id: string | null;
-  edited_at: string | null;
-  deleted_at: string | null;
-  created_at: string;
-};
-
-function payloadRecord(payload: { record?: DbMessagePayload; new?: DbMessagePayload; new_record?: DbMessagePayload }) {
-  return payload.record ?? payload.new ?? payload.new_record;
-}
-
-function payloadOldRecord(payload: { old_record?: DbMessagePayload; old?: DbMessagePayload }) {
-  return payload.old_record ?? payload.old;
-}
+import { ChannelBody, ChannelHeader, Composer, MessageRow, SearchOverlay } from "@/features/chat/chat-parts";
+import { useChannelRealtime, type TypingState } from "@/features/chat/use-channel-realtime";
+import { WorkspaceSidebar } from "@/features/chat/workspace-sidebar";
+import { useUnread } from "@/features/chat/use-unread";
+import { firstUnreadId } from "@/features/chat/unread";
+import { useNotifications } from "@/features/chat/use-notifications";
+import { NotificationBell } from "@/features/chat/notification-bell";
+import { StatusControl } from "@/features/chat/status-control";
+import { expiryFromMinutes } from "@/features/chat/status";
 
 function buildOptimisticMessage(args: {
   id: string;
@@ -99,9 +73,20 @@ export function ChatWorkspace() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [dividerLastRead, setDividerLastRead] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannel = useRef<RealtimeChannel | null>(null);
+  const lastReadRef = useRef<Record<string, string | null>>({});
+  const presenceRef = useRef<PresenceState>("active");
   const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? null;
+  const { unreadCounts, refreshUnread, markChannelRead } = useUnread(supabase, user?.id);
+  const onNotification = useCallback(() => {
+    void refreshUnread();
+    if (presenceRef.current !== "dnd") setToast("New activity");
+  }, [refreshUnread]);
+  const { notifications, markAllRead } = useNotifications(supabase, user?.id, onNotification);
+  const firstUnread = firstUnreadId(messages, dividerLastRead, user?.id);
 
   const fetchChannels = useCallback(async () => {
     const { data, error } = await supabase
@@ -151,16 +136,18 @@ export function ChatWorkspace() {
           return;
         }
 
+        const profileColumns =
+          "id,org_id,email,display_name,avatar_url,status,status_emoji,status_text,status_expires_at,presence,role,last_seen_at";
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("id,org_id,email,display_name,avatar_url,status,role,last_seen_at")
+          .select(profileColumns)
           .eq("id", authUser.id)
           .single();
         const typedProfile = profileData as unknown as Profile | null;
         const { data: memberData } = typedProfile
           ? await supabase
               .from("profiles")
-              .select("id,org_id,email,display_name,avatar_url,status,role,last_seen_at")
+              .select(profileColumns)
               .eq("org_id", typedProfile.org_id)
               .order("display_name", { ascending: true })
           : { data: [] };
@@ -169,6 +156,7 @@ export function ChatWorkspace() {
         setProfile(typedProfile);
         setMembers((memberData ?? []) as unknown as Profile[]);
         await fetchChannels();
+        await refreshUnread();
       } finally {
         if (live) setLoading(false);
       }
@@ -178,96 +166,46 @@ export function ChatWorkspace() {
     return () => {
       live = false;
     };
-  }, [fetchChannels, router, supabase]);
+  }, [fetchChannels, refreshUnread, router, supabase]);
+
+  useEffect(() => {
+    for (const channel of channels) {
+      if (!(channel.id in lastReadRef.current)) {
+        lastReadRef.current[channel.id] =
+          channel.channel_members?.find((member) => member.user_id === user?.id)?.last_read_at ?? null;
+      }
+    }
+  }, [channels, user?.id]);
 
   useEffect(() => {
     if (!activeChannelId) return;
     let live = true;
 
+    setDividerLastRead(lastReadRef.current[activeChannelId] ?? null);
     fetchMessages(activeChannelId).then((data) => {
       if (live) setMessages(data);
     });
 
+    const now = new Date().toISOString();
+    lastReadRef.current[activeChannelId] = now;
+    void markChannelRead(activeChannelId, now);
+
     return () => {
       live = false;
     };
-  }, [activeChannelId, fetchMessages]);
+  }, [activeChannelId, fetchMessages, markChannelRead]);
 
-  useEffect(() => {
-    if (!activeChannelId || !user) return;
-
-    const channel: RealtimeChannel = supabase.channel(`channel:${activeChannelId}`, {
-      config: {
-        private: true,
-        broadcast: { self: true },
-        presence: { key: user.id }
-      }
-    });
-
-    realtimeChannel.current = channel;
-
-    channel
-      .on("broadcast", { event: "INSERT" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const record = payloadRecord(payload);
-        if (!record || record.channel_id !== activeChannelId || record.parent_id) return;
-        setMessages((current) => mergeIncomingMessage(current, record));
-      })
-      .on("broadcast", { event: "UPDATE" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const record = payloadRecord(payload);
-        if (!record || record.channel_id !== activeChannelId || record.parent_id) return;
-        setMessages((current) => mergeIncomingMessage(current, record));
-      })
-      .on("broadcast", { event: "DELETE" }, ({ payload }) => {
-        if (payload.table === "reactions") {
-          fetchMessages(activeChannelId).then(setMessages);
-          return;
-        }
-
-        const oldRecord = payloadOldRecord(payload);
-        if (!oldRecord || oldRecord.channel_id !== activeChannelId) return;
-        setMessages((current) => removeMessage(current, oldRecord.id));
-      })
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (!payload || payload.user_id === user.id) return;
-        setTyping((current) => ({
-          ...current,
-          [payload.user_id]: { name: payload.name ?? "Someone", at: Date.now() }
-        }));
-      })
-      .on("presence", { event: "sync" }, () => {
-        setOnlineCount(Object.keys(channel.presenceState()).length || 1);
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            user_id: user.id,
-            name: profile?.display_name ?? user.email,
-            online_at: new Date().toISOString()
-          });
-        }
-      });
-
-    const cleanupTyping = window.setInterval(() => {
-      const now = Date.now();
-      setTyping((current) => Object.fromEntries(Object.entries(current).filter(([, value]) => now - value.at < 3500)));
-    }, 1500);
-
-    return () => {
-      window.clearInterval(cleanupTyping);
-      realtimeChannel.current = null;
-      supabase.removeChannel(channel);
-    };
-  }, [activeChannelId, fetchMessages, profile?.display_name, supabase, user]);
+  useChannelRealtime({
+    supabase,
+    activeChannelId,
+    user,
+    displayName: profile?.display_name,
+    fetchMessages,
+    setMessages,
+    setTyping,
+    setOnlineCount,
+    channelRef: realtimeChannel
+  });
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -294,6 +232,16 @@ export function ChatWorkspace() {
 
     return () => window.clearTimeout(timeout);
   }, [searchQuery, supabase]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  useEffect(() => {
+    presenceRef.current = profile?.presence ?? "active";
+  }, [profile?.presence]);
 
   async function createChannel(type: "public" | "private") {
     if (!user || !profile) return;
@@ -448,9 +396,45 @@ export function ChatWorkspace() {
     if (activeChannelId) setMessages(await fetchMessages(activeChannelId));
   }
 
+  async function editMessage(message: ChatMessage, nextBody: string) {
+    const text = nextBody.trim();
+    if (!user || !text || text === message.body) return;
+    const now = new Date().toISOString();
+    const apply = (list: ChatMessage[]) =>
+      list.map((item) => (item.id === message.id ? { ...item, body: text, edited_at: now } : item));
+    setMessages(apply);
+    setThreadMessages(apply);
+    setThreadRoot((current) => (current?.id === message.id ? { ...current, body: text, edited_at: now } : current));
+    await supabase.from("messages").update({ body: text, edited_at: now }).eq("id", message.id);
+  }
+
+  async function deleteMessage(message: ChatMessage) {
+    if (!user) return;
+    setMessages((current) => removeMessage(current, message.id));
+    setThreadMessages((current) => removeMessage(current, message.id));
+    await supabase.from("messages").update({ deleted_at: new Date().toISOString() }).eq("id", message.id);
+  }
+
   async function openThread(message: ChatMessage) {
     setThreadRoot(message);
     setThreadMessages(await fetchMessages(message.channel_id, message.id));
+  }
+
+  async function updatePresence(presence: PresenceState) {
+    if (!user || !profile) return;
+    setProfile({ ...profile, presence });
+    await supabase.from("profiles").update({ presence }).eq("id", user.id);
+  }
+
+  async function saveStatus(emoji: string | null, text: string, minutes: number) {
+    if (!user || !profile) return;
+    const next = {
+      status_emoji: emoji,
+      status_text: text || null,
+      status_expires_at: expiryFromMinutes(minutes, Date.now())
+    };
+    setProfile({ ...profile, ...next });
+    await supabase.from("profiles").update(next).eq("id", user.id);
   }
 
   async function signOut() {
@@ -471,102 +455,46 @@ export function ChatWorkspace() {
 
   return (
     <main className="grid h-screen grid-cols-[248px_minmax(0,1fr)] overflow-hidden bg-[var(--bg)] text-[var(--text)] lg:grid-cols-[248px_minmax(0,1fr)_360px]">
-      <aside className="flex min-h-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
-        <div className="flex h-11 items-center justify-between border-b border-[var(--line)] px-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="h-2 w-2 rounded-sm bg-[var(--accent)]" />
-            <span className="truncate text-sm font-medium tracking-tight">Flack</span>
-          </div>
-          <button
-            onClick={signOut}
-            className="grid h-7 w-7 place-items-center rounded-[5px] text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-            aria-label="Sign out"
-          >
-            <LogOut size={14} />
-          </button>
-        </div>
-
-        <div className="border-b border-[var(--line)] p-2">
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex h-8 w-full items-center justify-between rounded-[5px] border border-[var(--line)] bg-[var(--surface-0)] px-2 text-xs text-[var(--muted)] hover:border-[var(--line-strong)] hover:text-[var(--text)]"
-          >
-            <span className="flex items-center gap-2">
-              <Search size={13} /> Search
-            </span>
-            <span className="font-mono text-[10px] text-[var(--faint)]">⌘K</span>
-          </button>
-        </div>
-
-        <div className="thin-scrollbar min-h-0 flex-1 overflow-y-auto px-2 py-2">
-          <AdminSetupPanel
-            visible={profile?.role === "admin"}
-            inviteEmail={inviteEmail}
-            onInviteEmail={setInviteEmail}
-            onCreateInvite={createInvite}
-            inviteLink={inviteLink}
-            inviteMessage={inviteMessage}
+      <WorkspaceSidebar
+        profile={profile}
+        user={user}
+        onSignOut={signOut}
+        onOpenSearch={() => setSearchOpen(true)}
+        inviteEmail={inviteEmail}
+        onInviteEmail={setInviteEmail}
+        onCreateInvite={createInvite}
+        inviteLink={inviteLink}
+        inviteMessage={inviteMessage}
+        publicChannels={publicChannels}
+        dms={dms}
+        members={members}
+        activeChannelId={activeChannelId}
+        unreadCounts={unreadCounts}
+        onSelectChannel={setActiveChannelId}
+        newChannelName={newChannelName}
+        onNewChannelName={setNewChannelName}
+        onCreateChannel={() => createChannel("public")}
+        onCreateDm={createDm}
+        footer={
+          <StatusControl
+            profile={profile}
+            user={user}
+            onPresence={updatePresence}
+            onSaveStatus={saveStatus}
+            onClearStatus={() => saveStatus(null, "", 0)}
           />
-
-          <SectionTitle icon={<Hash size={12} />} label="Channels" />
-          <div className="space-y-px">
-            {publicChannels.map((channel) => (
-              <ChannelButton
-                key={channel.id}
-                channel={channel}
-                active={channel.id === activeChannelId}
-                onClick={() => setActiveChannelId(channel.id)}
-              />
-            ))}
-          </div>
-
-          <div className="mt-2 flex gap-1">
-            <Input
-              density="compact"
-              value={newChannelName}
-              onChange={(event) => setNewChannelName(event.target.value)}
-              placeholder="channel"
-            />
-            <Button size="icon" variant="ghost" onClick={() => createChannel("public")} aria-label="Create channel">
-              <Plus size={13} />
-            </Button>
-          </div>
-
-          <SectionTitle className="mt-4" icon={<MessageSquare size={12} />} label="DMs" />
-          <div className="space-y-px">
-            {dms.map((channel) => (
-              <ChannelButton
-                key={channel.id}
-                channel={channel}
-                active={channel.id === activeChannelId}
-                onClick={() => setActiveChannelId(channel.id)}
-              />
-            ))}
-          </div>
-
-          <SectionTitle className="mt-4" icon={<Users size={12} />} label="People" />
-          <div className="space-y-px">
-            {members
-              .filter((member) => member.id !== user?.id)
-              .slice(0, 10)
-              .map((member) => (
-                <button
-                  key={member.id}
-                  onClick={() => createDm(member.id)}
-                  className="flex h-7 w-full items-center gap-2 rounded-[5px] px-1.5 text-left text-xs text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-                >
-                  <Avatar name={member.display_name ?? member.email ?? "Member"} size="sm" />
-                  <span className="truncate">{member.display_name ?? member.email}</span>
-                </button>
-              ))}
-          </div>
-        </div>
-
-        <CurrentUserBadge profile={profile} user={user} />
-      </aside>
+        }
+      />
 
       <section className="flex min-w-0 flex-col">
-        <ChannelHeader activeChannel={activeChannel} onlineCount={onlineCount} messageCount={messages.length} />
+        <ChannelHeader
+          activeChannel={activeChannel}
+          onlineCount={onlineCount}
+          messageCount={messages.length}
+          actions={
+            <NotificationBell notifications={notifications} onMarkAllRead={markAllRead} onSelect={setActiveChannelId} />
+          }
+        />
 
         <ChannelBody
           messages={messages}
@@ -575,6 +503,9 @@ export function ChatWorkspace() {
           currentUserId={user?.id}
           onReact={toggleReaction}
           onThread={openThread}
+          onEdit={editMessage}
+          onDelete={deleteMessage}
+          firstUnreadId={firstUnread}
           onDraft={() => setBody("First update: ")}
           onPrepareChannel={() => setNewChannelName("team-updates")}
           inviteEmail={inviteEmail}
@@ -623,6 +554,8 @@ export function ChatWorkspace() {
                   currentUserId={user?.id}
                   onReact={toggleReaction}
                   onThread={openThread}
+                  onEdit={editMessage}
+                  onDelete={deleteMessage}
                   compact
                 />
               ))}
@@ -652,6 +585,12 @@ export function ChatWorkspace() {
           setSearchOpen(false);
         }}
       />
+
+      {toast ? (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-40 rounded-[6px] border border-[var(--line-strong)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] shadow-xl shadow-black/40">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -22,6 +22,10 @@ export type Database = {
         display_name: string | null;
         avatar_url: string | null;
         status: string | null;
+        status_emoji: string | null;
+        status_text: string | null;
+        status_expires_at: string | null;
+        presence: "active" | "away" | "dnd";
         role: "admin" | "member";
         last_seen_at: string | null;
         created_at: string;
@@ -93,12 +97,24 @@ export type Database = {
         revoked_at: string | null;
         created_at: string;
       }>;
+      link_previews: Table<{
+        url: string;
+        title: string | null;
+        description: string | null;
+        image_url: string | null;
+        site_name: string | null;
+        fetched_at: string;
+      }>;
     };
     Views: Record<string, never>;
     Functions: {
       accept_invite: {
         Args: { invite_token: string };
         Returns: string;
+      };
+      channel_unread_counts: {
+        Args: Record<string, never>;
+        Returns: Array<{ channel_id: string; unread: number }>;
       };
       create_invite: {
         Args: { invite_email: string; invite_role?: "admin" | "member" };

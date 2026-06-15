@@ -1,5 +1,7 @@
 export type ChannelType = "public" | "private" | "dm";
 
+export type PresenceState = "active" | "away" | "dnd";
+
 export type Profile = {
   id: string;
   org_id: string;
@@ -7,6 +9,10 @@ export type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   status: string | null;
+  status_emoji: string | null;
+  status_text: string | null;
+  status_expires_at: string | null;
+  presence: PresenceState;
   role: "admin" | "member";
   last_seen_at: string | null;
 };
@@ -51,6 +57,18 @@ export type ChatMessage = {
   profiles?: Pick<Profile, "display_name" | "avatar_url" | "email"> | null;
   reactions?: Reaction[];
   attachments?: Attachment[];
+};
+
+export type NotificationType = "mention" | "thread" | "dm" | "reaction";
+
+export type AppNotification = {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  message_id: string | null;
+  read_at: string | null;
+  created_at: string;
+  messages?: { body: string; channel_id: string } | null;
 };
 
 export type SearchHit = {

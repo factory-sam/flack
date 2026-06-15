@@ -16,8 +16,15 @@ Low-latency team chat for a single organization. Flack is a real-time messaging 
 
 - Public and private channels, plus direct messages (`channels.type`: `public` | `private` | `dm`)
 - Threaded replies (`messages.parent_id`)
+- Message editing and soft-delete with realtime reconciliation
 - Optimistic message sending with realtime broadcast reconciliation
+- Rich text rendering (sanitized GitHub-flavored markdown)
+- Full emoji reactions via picker with recent-emoji history
 - Mentions with notifications, reactions, and file attachments (Supabase Storage)
+- Unread tracking: per-channel badges (`channel_unread_counts` RPC), new-messages divider, mark-on-read
+- Notification center with a live bell over the `user:<id>` private realtime topic
+- Custom status (emoji/text/expiry) and presence (active/away/do-not-disturb); do-not-disturb suppresses activity toasts
+- SSRF-safe link unfurling (`/api/unfurl`) with `link_previews` caching
 - Full-text message search via the `search_messages` Postgres function
 - Multi-tenant organizations with row-level security (RLS) isolating data per org
 - Invite-based onboarding (`create_invite` / `accept_invite` RPCs)
@@ -132,9 +139,9 @@ playwright.config.ts        # Playwright configuration
 
 Schema lives in `supabase/migrations/`. Core tables (all with RLS, scoped per organization):
 
-`organizations`, `profiles`, `channels`, `channel_members`, `messages`, `reactions`, `attachments`, `mentions`, `notifications`, `invites`.
+`organizations`, `profiles`, `channels`, `channel_members`, `messages`, `reactions`, `attachments`, `mentions`, `notifications`, `invites`, `link_previews`.
 
-Key database functions: `current_org_id()`, `is_admin()`, `is_channel_member()`, `create_invite()`, `accept_invite()`, `search_messages()`. Triggers broadcast message/reaction changes over Supabase Realtime and create mention notifications. A `handle_new_user` trigger provisions a profile when an auth user is created.
+Key database functions: `current_org_id()`, `is_admin()`, `is_channel_member()`, `create_invite()`, `accept_invite()`, `search_messages()`, `channel_unread_counts()`. Triggers broadcast message/reaction changes over Supabase Realtime, create mention/thread/dm/reaction notifications, and broadcast new notifications to each recipient's `user:<id>` private topic. A `handle_new_user` trigger provisions a profile when an auth user is created.
 
 ## Testing
 
